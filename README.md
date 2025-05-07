@@ -1,93 +1,113 @@
-# Übung 3
+## Übungsblatt 3
 
+Die Suche nach Haltestellen soll in dieser Übung erweitert werden. Auch die Anzeige in Ihrer Liste wird ausgebaut, sodass Nutzerinnen und Nutzer nicht nur die Stationen suchen können, sondern auch weitere Informationen zu Linien und Haltestellen angezeigt bekommen.
 
+Sie arbeiten auch in dieser Übung mit den Ergebnissen aus Übung 2 weiter. Stellen Sie deswegen sicher, das ihr bisheriger Code gut funktioniert und Sie bereits ein Qt-Projekt und ein funktionierendes Fenster als Grundgerüst implementiert haben.
 
-## Getting started
+Für die Durchführung verwenden Sie wieder die GTFS-Daten, welche Sie im Übungs-Repository finden (https://gtfs.org/schedule/reference).
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## GTFS-Datenstruktur
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Die Daten im GTFS-Format liegen strukturiert vor und die einzelnen Dateien stehen in Verbindung miteinander. Diese Verbindungen zu erkennen und zu verstehen ist schwierig wenn nur die Dateien analysiert werden. Die folgende Grafik soll dabei helfen Ihnen die Zusammenhänge zu verdeutlichen.
 
-## Add your files
+![Klassendiagramm der GTFS-Daten](Datenstruktur.png)
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+Jede Linie der U- und S-Bahnen in Berlin ist mit einer Zeile in der Datei `routes.txt` gespeichert. Jede Linie hat eine eindeutige ID (`route_id`). Sie sehen im Feld `route_short_name`, dass einige Linien mehrfach auftauchen (wie bspw. die **S3**). Dies liegt an unterschiedlichen Start- und Endhaltestellen. 
 
+Jede Fahrt auf einer Linie ist als Eintrag in der Datei `trips.txt` gespeichert. Zu welcher Linie die Fahrt gehört ist über das Feld `route_id` erkennbar. Jede Fahrt wiederum hat ebenfalls eine eindeutige Nummer - die `trip_id`.
+Die Information aus welchen Haltestellen eine Fahrt besteht wird über die Einträge in der Datei `stop_times.txt` ermittelt. Jeder Halt ist über die `trip_id` mit der Fahrt verbunden zu der er gehört. Zusätzlich finden Sie Informationen zu Ankunft (`arrival_time`), Abfahrt (`departure_time`) und Nummer des Halts auf der Fahrt (`stop_sequence`) in der Datei. 
+
+Zum Schluss muss noch die Information bereitgestellt werden, an welchem Bahnhof oder Gleis der Halt stattfindet. Dazu verfügt jeder Eintrag in `stop_times.txt` über das Feld `stop_id`. Diese ID gehört zu einem eindeutigen Eintrag in der Datei `stops.txt`. Hier sind alle Haltestellen gespeichert und besitzen mit der `stop_id` eine eindeutige Nummer. Um zu ermitteln ob es sich bei der Haltestelle um einen Bahnhof oder ein einzelnen Gleis handelt kann das Feld `location_type` verwendet werden. Ist hier der Wert `0` gespeichert handelt es sich um ein Gleis und im Feld `parent_station` ist die ID der Haltestelle des Bahnhofs gespeichert. Bahnhöfe besitzen den Wert `1` im Feld `location_type` (https://gtfs.org/documentation/schedule/reference/#stopstxt).
+
+Diese Informationen reichen für die Bearbeitung dieser Übung aus. Informieren Sie sich selbst über den Inhalt der anderen Dateien.
+
+## Linien auswählen
+
+Wie unter Punkt *GTFS-Datenstruktur* beschrieben sind alle Linien im Netzplan in der Datei `routes.txt` abgespeichert und sind durch Ihre Implementierung in Übung 1 in Ihrer `Network`-Klasse im Attribut `routes` verfügbar.
+
+In dieser Teilaufgabe erweitern Sie die Oberfläche um ein neues Auswahlfeld (eine sog. Combo Box). In diesem sollen die verfügbaren Linien angezeigt werden. Die Anwendung soll wieder alle Methoden zur Berechnung von Daten in die Network-Klasse integrieren und vom Code zur Darstellung trennen.
+
+- Implementieren Sie in Ihrer Network-Klasse eine Methode getRoutes. Diese erhält keine Parameter und gibt einen `std::vector<bht::Route>` mit allen verfügbaren Linien zurück. 
+```cpp
+std::vector<bht::Route> getRoutes();
 ```
-cd existing_repo
-git remote add origin https://gitlab.bht-berlin.de/sose-2025-ti-b15/uebung-3.git
-git branch -M main
-git push -uf origin main
+
+- Für die Anzeige der Linien in der Combo Box soll der `route_short_name` verwendet werden. Ist ebenfalls ein `route_long_name` angegeben wird dieser dahinter in Klammern angezeigt. Implementieren Sie für die Anforderung eine Methode in der `Network`-Klasse, welche die Linie als Parameter übergeben bekommt und den anzuzeigenden String zurückgibt mit folgender Signatur:
+
+```cpp
+std::string getRouteDisplayName(bht::Route route);
 ```
 
-## Integrate with your tools
+- Erweitern Sie Ihre grafische Oberfläche so, dass über Ihrem Suchfeld für die Stationen aus Übung 2 eine Combo Box angezeigt wird (`QComboBox`)
+- In der Combo Box werden alle Linien mit ihrem Anzeigenamen aufgeführt. Verwenden Sie Ihre neuen Methoden `getRoutes` und `getRouteDisplayName` in der `Network`-Klasse um die Elemente für die Combo Box zu ermitteln.
 
-- [ ] [Set up project integrations](https://gitlab.bht-berlin.de/sose-2025-ti-b15/uebung-3/-/settings/integrations)
+## Fahrt auswählen
 
-## Collaborate with your team
+Ist eine Linie ausgewählt kann der\*die Anwender\*in eine Fahrt auf dieser Linie auswählen für die weitere Details angezeigt werden sollen.
+Durch die Auswahl einer Linie kennen sie die ID der Linie (Feld id im Typ Route). Wie in *GTFS-Datenstruktur* beschrieben ist dies die `route_id`, mit der Sie alle Fahrten finden können, welche zu der Linie gehören. Die Fahrten sind in dem Attribute `trips` Ihrer `Network`-Klasse gespeichert.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- Finden Sie zu der ausgewählten ID der Route alle Fahrten indem Sie in allen Einträgen der Map `trips` nach Einträgen suchen, bei denen die `routeId` mit der ID der gewählten Route übereinstimmt. Implementieren Sie diese Suche nach Fahrten einer Linie in einer eigenen Methode in Ihrer `Network`-Klasse.
 
-## Test and Deploy
+```cpp
+std::vector<Trip> getTripsForRoute(std::string routeId);
+```
 
-Use the built-in continuous integration in GitLab.
+- Um eine einzelne Fahrt gut lesbar darzustellen implementieren Sie in der `Network`-Klasse eine Methode zur Umwandlung einer `Trip`-Datenstruktur in einen String. Eine Fahrt soll dabei in der Form `<shortName> - <headsign>` angezeigt werden.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+```cpp
+std::string getTripDisplayName(bht::Trip trip);
+```
 
-***
+- Erweitern Sie Ihre grafische Oberfläche um eine weitere `QComboBox` unter der Combo Box für die Auswahl der Linie. 
+- Zeigen Sie in dieser Combo Box alle Fahrten der ausgewählten Linie an. Zeigen Sie Einträge in der Form an, wie sie die Methode `getTripDisplayName` zurückgibt.
 
-# Editing this README
+## QListView zum QTableView
+Nachdem in den beiden Combo Boxen Einträge ausgewählt sind sollen in dem Bereich darunter Informationen zu den Haltestellen dieser Linie angezeigt werden.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+- Implementieren Sie eine Methode in der Network-Klasse, mit der zu einem Fahrt alle Halte abgerufen werden können in der Reihenfolge, wie sie angefahren werden (also sortiert nach dem Feld `stopSequence`).
 
-## Suggestions for a good README
+```cpp
+std::vector<StopTime> getStopTimesForTrip(std::string tripId);
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- Außerdem benötigen Sie eine Methode, mit der Sie eine Haltestelle zu dessen ID abfragen können. Implementieren Sie in der `Network`-Klasse eine passende `getter`-methode hierfür:
 
-## Name
-Choose a self-explaining name for your project.
+```cpp
+Stop getStopById(std::string stopId);
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- Die Tabelle besitzt folgende Spalten: "**Nr.**", "**Name Haltestelle**", "**Ankunftszeit**", "**Abfahrtszeit**"
+- Ermitteln Sie alle Haltestellen der ausgewählten Fahrt mit Ihrer Methode `getStopTimesForTrip`.
+- Zeigen Sie für jede Haltestelle eine Zeile in der Tabelle an. Verwenden die Felder `arrivalTime`, `departureTime` und `stopSequence` für die Spalten "Ankunftszeit", "Abfahrtszeit" und "Nr.".
+- Ermitteln Sie über Ihre Methode `getStopById` die Daten zur Haltestelle des Halts und zeigen dessen Namen in der Spalte "Name Haltestelle" an.
+- Ihr Suchfeld für die Suche nach Haltestellen und die neue Ergebnis-Tabelle sind so lange inaktiv (`enabled = false`), bis ein Eintrag in der Combo Box für die Linie und ein Eintrag in der Combo Box für die Fahrt ausgewählt wurde.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Suche in der Tabelle
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+Verändern Sie die Suche mit Ihrem Suchfeld so, dass nun in den Elementen in der Tabelle gesucht werden kann. Erhalten Sie jedoch ihre alte Such-Funktion in der Klasse Network, wir benötigen Sie zu einem späteren Zeitpunkt noch.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+- Implementieren Sie eine Methode in der Network-Klasse, mit der zu einem Fahrt alle Halte abgerufen werden können in der Reihenfolge, wie sie angefahren werden gefiltert nach einem Such-String.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```cpp
+std::vector<StopTime> searchStopTimesForTrip(std::string query, std::string tripId);
+```
+- Verwenden Sie diese Methode um die Ergebnisse der Tabelle zu filtern.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Abgabe und automatische Auswertung
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Die automatische Auswertung prüft die Methoden aus den angegebenen Aufgaben. Außerdem wird Ihre grafische Oberfläche mit automatisierten Tests geprüft. Dazu wird die Anwendung mit `qmake` erstellt und ausgeführt. 
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Sie finden im Repository der Übungsaufgabe eine Datei `tester.cpp`. Diese Datei enthält die Testfälle für Ihre Anwendung. Diese können Sie sich ansehen und selbst prüfen ob Ihre Anwendung diese Testfälle erfüllt. Die Tests werden mit dem Googletest-Framework realisiert (https://github.com/google/googletest).
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+Die Datei `tester.cpp` darf von Ihnen **nicht** verändert werden. Die Integrität der Datei wird bei der automatischen Auswertung per Prüfsumme verifiziert.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+Die folgenden Anforderungen werden in der Abgabe geprüft:
+- Die Anwendungen kann übersetzt werden mit qmake.
+- Die Datei `tester.cpp` ist unverändert.
+- Ihre Abgabe enthält wieder ein `Makefile` mit dem Target `autotest`, welche Die Datei `tester.cpp` mit den benötigten Quellcode-Dateien übersetzt und die Datei `test_runner` erzeugt. Der Befehl zum Übersetzen Ihrer Anwendung sollte wieder beginnen mit dem unten genannten Kommando gefolgt von Ihren C++-Quelldateien (außer denen mit der main-Methode und dem QT-Fenster)
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```bash
+g++ -I. -I/usr/local/include -std=c++17 -o test_runner /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a <Ihre CPP-Dateien...>
+```
+- Die Unit-Tests für die Aufgaben können ohne Fehler ausgeführt werden.
+- Eine Plagiatsprüfung findet keine Treffer.
