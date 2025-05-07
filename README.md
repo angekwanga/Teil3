@@ -107,7 +107,7 @@ Die folgenden Anforderungen werden in der Abgabe geprüft:
 - Ihre Abgabe enthält wieder ein `Makefile` mit dem Target `autotest`, welche Die Datei `tester.cpp` mit den benötigten Quellcode-Dateien übersetzt und die Datei `test_runner` erzeugt. Der Befehl zum Übersetzen Ihrer Anwendung sollte wieder beginnen mit dem unten genannten Kommando gefolgt von Ihren C++-Quelldateien (außer denen mit der main-Methode und dem QT-Fenster)
 
 ```bash
-g++ -I. -I/usr/local/include -std=c++17 -o test_runner /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a <Ihre CPP-Dateien...>
+g++ -I. -I/usr/local/include -std=c++17 -o test_runner /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a tester.cpp <Ihre CPP-Dateien...>
 ```
 - Die Unit-Tests für die Aufgaben können ohne Fehler ausgeführt werden.
 - Eine Plagiatsprüfung findet keine Treffer.
