@@ -1,30 +1,48 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QPlainTextEdit>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QTableView>
+#include <QStandardItemModel>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QLabel>
-#include <QListView>
-#include <QStringListModel>
 #include "network.h"
-
-namespace bht {
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-    void onTextChanged();
+    void onRouteSelected(int index);
+    void onTripSelected(int index);
+    void onSearchTextChanged(const QString &text);
 
 private:
-    QPlainTextEdit *searchInputField;
-    QLabel *searchLabel;
-    QListView *resultListView;
-    QStringListModel *resultModel;
-    Network network;
-};
+    // GUI elements
+    QComboBox *routeComboBox;
+    QComboBox *tripComboBox;
+    QLineEdit *searchLineEdit;
+    QTableView *stopsTableView;
+    QStandardItemModel *stopsTableModel;
+    QWidget *centralWidget;
+    QVBoxLayout *mainLayout;
 
-} // namespace bht
+    // Network data
+    bht::Network *network;
+    std::vector<bht::Route> routes;
+    std::vector<bht::Trip> currentTrips;
+    std::string currentTripId;
+
+    // Helper methods
+    void setupUi();
+    void loadRoutes();
+    void loadTrips(const std::string &routeId);
+    void loadStopTimes(const std::string &tripId);
+    void updateStopsTable(const std::vector<bht::StopTime> &stopTimes);
+    QString formatTime(const bht::GTFSTime &time);
+};
