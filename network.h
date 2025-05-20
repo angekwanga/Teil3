@@ -47,6 +47,22 @@ public:
 
     // Search method for Exercise 2
     std::vector<Stop> search(const std::string& searchTerm);
+    
+    // New methods for Exercise 3
+    // b) Route selection
+    std::vector<Route> getRoutes();
+    std::string getRouteDisplayName(Route route);
+    
+    // c) Trip selection
+    std::vector<Trip> getTripsForRoute(std::string routeId);
+    std::string getTripDisplayName(Trip trip);
+    
+    // d) Stop information
+    std::vector<StopTime> getStopTimesForTrip(std::string tripId);
+    Stop getStopById(std::string stopId);
+    
+    // e) Search in stop times
+    std::vector<StopTime> searchStopTimesForTrip(std::string query, std::string tripId);
 
 private:
     // Helper methods to load different file types

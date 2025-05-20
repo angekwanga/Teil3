@@ -122,6 +122,103 @@ std::vector<Stop> Network::search(const std::string& searchTerm) {
     return results;
 }
 
+// New methods for Exercise 3
+// b) Route selection
+std::vector<Route> Network::getRoutes() {
+    std::vector<Route> routeList;
+    for (const auto& pair : routes) {
+        routeList.push_back(pair.second);
+    }
+    return routeList;
+}
+
+std::string Network::getRouteDisplayName(Route route) {
+    if (route.longName.empty()) {
+        return route.shortName;
+    } else {
+        return route.shortName + " - " + route.longName;
+    }
+}
+
+// c) Trip selection
+std::vector<Trip> Network::getTripsForRoute(std::string routeId) {
+    std::vector<Trip> tripList;
+    for (const auto& trip : trips) {
+        if (trip.routeId == routeId) {
+            tripList.push_back(trip);
+        }
+    }
+    return tripList;
+}
+
+std::string Network::getTripDisplayName(Trip trip) {
+    return trip.shortName + " - " + trip.headsign;
+}
+
+// d) Stop information
+std::vector<StopTime> Network::getStopTimesForTrip(std::string tripId) {
+    std::vector<StopTime> tripStopTimes;
+    
+    // Find all stop times for the trip
+    for (const auto& stopTime : stopTimes) {
+        if (stopTime.tripId == tripId) {
+            tripStopTimes.push_back(stopTime);
+        }
+    }
+    
+    // Sort by stop sequence
+    std::sort(tripStopTimes.begin(), tripStopTimes.end(), 
+              [](const StopTime& a, const StopTime& b) {
+                  return a.stopSequence < b.stopSequence;
+              });
+    
+    return tripStopTimes;
+}
+
+Stop Network::getStopById(std::string stopId) {
+    auto it = stops.find(stopId);
+    if (it != stops.end()) {
+        return it->second;
+    }
+    
+    // Return an empty stop if not found
+    Stop emptyStop;
+    emptyStop.id = "";
+    emptyStop.name = "Unknown Stop";
+    return emptyStop;
+}
+
+// e) Search in stop times
+std::vector<StopTime> Network::searchStopTimesForTrip(std::string query, std::string tripId) {
+    std::vector<StopTime> filteredStopTimes;
+    std::vector<StopTime> allStopTimes = getStopTimesForTrip(tripId);
+    
+    if (query.empty()) {
+        return allStopTimes;  // Return all if query is empty
+    }
+    
+    // Convert query to lowercase for case-insensitive comparison
+    std::string lowerQuery = query;
+    std::transform(lowerQuery.begin(), lowerQuery.end(), lowerQuery.begin(),
+                  [](unsigned char c) { return std::tolower(c); });
+    
+    // Filter stop times whose stop names contain the query
+    for (const auto& stopTime : allStopTimes) {
+        Stop stop = getStopById(stopTime.stopId);
+        
+        // Convert stop name to lowercase for case-insensitive comparison
+        std::string lowerStopName = stop.name;
+        std::transform(lowerStopName.begin(), lowerStopName.end(), lowerStopName.begin(),
+                      [](unsigned char c) { return std::tolower(c); });
+        
+        if (lowerStopName.find(lowerQuery) != std::string::npos) {
+            filteredStopTimes.push_back(stopTime);
+        }
+    }
+    
+    return filteredStopTimes;
+}
+
 // Utility methods
 GTFSDate Network::parseDate(const std::string& dateStr) {
     GTFSDate date = {0, 0, 0};
@@ -153,7 +250,7 @@ GTFSTime Network::parseTime(const std::string& timeStr) {
     return time;
 }
 
-// Implement all the loading methods with placeholder functionality
+// Loading methods implementation remains the same
 void Network::loadAgencies(const std::string& directoryPath) {
     try {
         CSVReader reader(directoryPath + "/agency.txt");
