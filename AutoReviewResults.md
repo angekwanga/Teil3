@@ -1,9 +1,9 @@
-BEWERTUNG: 0
+BEWERTUNG: 1
 
 # Auswertung der Abgabe
 
 - Status: Abgabe wurde bewertet
-- Punkte: **0** von **100**
+- Punkte: **1** von **100**
 
 ## Test 1
 
@@ -11,7 +11,7 @@ BEWERTUNG: 0
 - Beschreibung: Das erforderliche Makefile muss vorhanden sein.
 - Status: ausgeführt
 - Erfolgreich: **Ja**
-- Laufzeit: 0:00:00.000016
+- Laufzeit: 0:00:00.000023
 ##### Testschritte
 - Makefile soll vorhanden sein: OK
 
@@ -20,48 +20,58 @@ BEWERTUNG: 0
 - Test: *Qt-Projektdatei ist vorhanden*
 - Beschreibung: Eine Projektdatei für das Qt-Projekt zum erstellen mit qmake ist vorhanden.
 - Status: ausgeführt
-- Erfolgreich: **Nein**
-- Laufzeit: 0:00:00.000224
-- Punkte: **0**
+- Erfolgreich: **Ja**
+- Laufzeit: 0:00:00.000258
+- Punkte: **1**
 ##### Testschritte
-- Für ./**/*.pro wurden nur 0 von 1 Dateien gefunden: fehlgeschlagen
-
-##### Hinweise zur Behebung des Fehlers
-
-- Kontrollieren Sie ob in Ihrem Repository eine Datei mit der Endung **pro** vorhanden ist
-- Die Datei darf in Unterverzeichnissen liegen, und Sie sollten diese auf Ihrem Rechner mit Qt Creator öffnen können.
-
+- Für ./**/*.pro wurde ./project.pro gefunden: OK
 
 ## Test 3
 
 - Test: *Makefile-Target autotest existiert*
 - Beschreibung: Das Makefile besitzt ein Target zum kompilieren der Tests.
-- Status: nicht ausgeführt
-- Erfolgreich: **Nein**
-##### Hinweise zur Behebung des Fehlers
-
-Der Test wurde nicht ausgeführt, da vorherige Tests fehlgeschlagen sind. Beheben Sie die vorherigen Probleme und versuchen Sie es dann erneut.
+- Status: ausgeführt
+- Erfolgreich: **Ja**
+- Laufzeit: 0:00:00.000150
+##### Testschritte
+- Inhalt von Makefile prüfen: OK
 
 ## Test 4
 
 - Test: *tester.cpp-Datei ist unverändert*
 - Beschreibung: Die Datei tester.cpp wurde nicht verändert und ist genau so wie im Original-Repository.
-- Status: nicht ausgeführt
-- Erfolgreich: **Nein**
-##### Hinweise zur Behebung des Fehlers
-
-Der Test wurde nicht ausgeführt, da vorherige Tests fehlgeschlagen sind. Beheben Sie die vorherigen Probleme und versuchen Sie es dann erneut.
+- Status: ausgeführt
+- Erfolgreich: **Ja**
+- Laufzeit: 0:00:00.000101
+##### Testschritte
+- Hash-Test von tester.cpp auf ['06a72f969e0658dace6443dcfb68581b671c51ab', 'e03f3983541ebbfe8db5cf60e44296e3c359619f']: OK
 
 ## Test 5
 
 - Test: *Kompilieren der Tests*
 - Beschreibung: Mit dem Befehl `make autotest` können die Tests kompiliert werden.
-- Status: nicht ausgeführt
+- Status: ausgeführt
 - Erfolgreich: **Nein**
+- Laufzeit: 0:00:00.264935
 - Punkte: **0**
+- Return-Code / Fehlercode: `2`
+- Kommandozeile: `make autotest`
+##### Testschritte
+- Rückgabe-Code ist `0`: fehlgeschlagen
+
+##### Fehlerausgabe
+
+```make: qmake: No such file or directory
+Makefile:4: /mkspecs/features/default_pre.mk: No such file or directory
+make: *** No rule to make target '/mkspecs/features/default_pre.mk'.  Stop.
+```
+
 ##### Hinweise zur Behebung des Fehlers
 
-Der Test wurde nicht ausgeführt, da vorherige Tests fehlgeschlagen sind. Beheben Sie die vorherigen Probleme und versuchen Sie es dann erneut.
+- Stellen Sie sicher, dass der Kompilier-Befehl mit dem angegebenen Befehl aus dem Übungsblatt übereinstimmt.
+- Sie dürfen in Ihren C++-Dateien, welche mit kompiliert werden, **keine** eigene main-Funktion haben. Kommentieren Sie diese ggf. aus.
+- Entfernen Sie ggf. Dateien mit dem Namen `test_runner` aus Ihrem Repository.
+
 
 ## Test 6
 
