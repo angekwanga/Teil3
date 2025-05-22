@@ -1,17 +1,30 @@
 #include "mainwindow.h"
 #include <QHeaderView>
+#include <fstream>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     // Create network instance
     try {
-        network = new bht::Network("GTFSShort");
+        // Try different possible data directory names
+        std::string dataDir = "GTFSShort";
+        // Check if GTFSTest exists (used by automated tests)
+        std::ifstream testFile("/GTFSTest/agency.txt");
+        if (testFile.good()) {
+            dataDir = "/GTFSTest";
+        }
+        testFile.close();
+        
+        network = new bht::Network(dataDir);
     } catch (const std::exception& e) {
         std::cerr << "Error initializing network: " << e.what() << std::endl;
+        network = nullptr;
     }
     
     setupUi();
-    loadRoutes();
+    if (network) {
+        loadRoutes();
+    }
 }
 
 MainWindow::~MainWindow() {
@@ -73,6 +86,8 @@ void MainWindow::setupUi() {
 }
 
 void MainWindow::loadRoutes() {
+    if (!network) return;
+    
     // Get all routes from network
     routes = network->getRoutes();
     
@@ -84,7 +99,7 @@ void MainWindow::loadRoutes() {
 }
 
 void MainWindow::onRouteSelected(int index) {
-    if (index < 0) return;
+    if (index < 0 || !network) return;
     
     // Get selected route ID
     QString routeId = routeComboBox->itemData(index).toString();
@@ -98,6 +113,8 @@ void MainWindow::onRouteSelected(int index) {
 }
 
 void MainWindow::loadTrips(const std::string &routeId) {
+    if (!network) return;
+    
     // Get trips for selected route
     currentTrips = network->getTripsForRoute(routeId);
     
@@ -128,13 +145,15 @@ void MainWindow::onTripSelected(int index) {
 }
 
 void MainWindow::loadStopTimes(const std::string &tripId) {
+    if (!network) return;
+    
     // Get stop times for selected trip
     std::vector<bht::StopTime> stopTimes = network->getStopTimesForTrip(tripId);
     updateStopsTable(stopTimes);
 }
 
 void MainWindow::onSearchTextChanged(const QString &text) {
-    if (currentTripId.empty()) return;
+    if (currentTripId.empty() || !network) return;
     
     // Search stop times with filter
     std::vector<bht::StopTime> filteredStopTimes = 
@@ -144,6 +163,8 @@ void MainWindow::onSearchTextChanged(const QString &text) {
 }
 
 void MainWindow::updateStopsTable(const std::vector<bht::StopTime> &stopTimes) {
+    if (!network) return;
+    
     // Clear existing table data
     stopsTableModel->removeRows(0, stopsTableModel->rowCount());
     
