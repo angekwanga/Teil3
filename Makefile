@@ -2,8 +2,8 @@
 
 # Variables
 TARGET = gtfs_explorer
-SOURCES = main.cpp mainwindow.cpp network.cpp
-HEADERS = mainwindow.h network.h types.h
+SOURCES = main.cpp mainwindow.cpp network.cpp CSVReader.cpp
+HEADERS = mainwindow.h network.h types.h CSVReader.h
 
 # Default rule - create project file and build
 all: $(TARGET).pro
@@ -20,7 +20,7 @@ $(TARGET).pro:
 
 # Rule for building test runner (required by assignment)
 test_runner: tester.cpp network.cpp
-	g++ -I. -I/usr/local/include -std=c++17 -o test_runner /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a tester.cpp network.cpp
+	g++ -I. -I/usr/local/include -std=c++17 -o test_runner /usr/local/lib/libgtest_main.a /usr/local/lib/libgtest.a tester.cpp network.cpp CSVReader.cpp
 
 # Auto test target as required by the assignment
 autotest: test_runner

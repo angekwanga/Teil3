@@ -8,25 +8,6 @@
 
 namespace bht {
 
-class CSVReader {
-private:
-    std::ifstream file;
-    std::unordered_map<std::string, int> headers;
-    std::vector<std::string> currentRow;
-
-public:
-    CSVReader(const std::string& filePath);
-    std::string getField(const std::string& key);
-    std::string getField(const std::string& key, const std::string& defaultValue);
-    bool next();
-    bool hasNext();
-    void reset();
-
-private:
-    void parseHeaders();
-    std::vector<std::string> parseLine(const std::string& line);
-};
-
 class Network {
 public:
     // Public attributes as required
@@ -82,5 +63,4 @@ private:
     GTFSDate parseDate(const std::string& dateStr);
     GTFSTime parseTime(const std::string& timeStr);
 };
-
-} // namespace bht
+}

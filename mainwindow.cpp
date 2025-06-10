@@ -1,17 +1,15 @@
+#include "network.h"
 #include "mainwindow.h"
 #include <QHeaderView>
 #include <fstream>
 #include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    // Create network instance
     try {
-        // Try different possible data directory names
-        std::string dataDir = "GTFSShort";
-        // Check if GTFSTest exists (used by automated tests)
-        std::ifstream testFile("/GTFSTest/agency.txt");
+        std::string dataDir = "./";
+        std::ifstream testFile("agency.txt");
         if (testFile.good()) {
-            dataDir = "/GTFSTest";
+            dataDir = "./";
         }
         testFile.close();
         
